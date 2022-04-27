@@ -1,15 +1,20 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class HexMapEditor : MonoBehaviour
+public enum BrushType { 
+    Terrain, Paint, Rivers
+}
+public class HexMeshBrush : MonoBehaviour
 {
     public Color[] colors;
     private Color activeColor;
-    private int activeElevation;
-    int brushSize;
+    [HideInInspector] public int activeElevation;
+    [HideInInspector] public int brushSize;
+    private BrushType brushType;
+
 
     public HexGrid hexGrid;
-
     bool applyColor;
     bool applyElevation;
     bool isDrag;
@@ -26,7 +31,7 @@ public class HexMapEditor : MonoBehaviour
 
     void Update()
     {
-        if (   Input.GetMouseButton(0) 
+        if (  Input.GetMouseButton(0) 
             && !EventSystem.current.IsPointerOverGameObject()) 
             { HandleInput(); }
         else { previousCell = null; }
@@ -42,6 +47,11 @@ public class HexMapEditor : MonoBehaviour
             EditCells(currentCell);
             previousCell = currentCell;
         } else { previousCell = null; }
+    }
+
+    public void SetType(BrushType _brushType)
+    {
+        brushType = _brushType;
     }
 
     void ValidateDrag(HexCell currentCell) {
@@ -75,7 +85,7 @@ public class HexMapEditor : MonoBehaviour
     }
 
     void EditCell (HexCell cell) {
-        if (cell)
+        /* if (cell)
         {
             if (applyColor) { cell.color = activeColor; }
             if (applyElevation) cell.Elevation = activeElevation;
@@ -83,6 +93,17 @@ public class HexMapEditor : MonoBehaviour
             else if (isDrag && riverMode == OptionalToggle.Yes) {
                 HexCell otherCell = cell.GetNeighbor(dragDirection.Opposite());
                 if (otherCell) otherCell.SetOutgoingRiver(dragDirection); }
+        }*/
+        switch (brushType) {
+            case BrushType.Terrain:
+                cell.Elevation = activeElevation;
+                break;
+            case BrushType.Paint:
+                cell.color = activeColor;
+                break;
+            case BrushType.Rivers:
+                break;
+            default: break;
         }
     }
 
@@ -90,25 +111,5 @@ public class HexMapEditor : MonoBehaviour
         applyColor = index >= 0;
         if (applyColor) { activeColor = colors[index]; }
         //UnityEngine.Debug.Log("active color is " + activeColor.ToString());
-    }
-
-        public void SetApplyColor (bool toggle) {
-        applyColor = toggle;
-    }
-
-    public void SetApplyElevation (bool toggle) {
-        applyElevation = toggle;
-    }
-
-    public void SetElevation (float elevation) {
-        activeElevation = (int)elevation;
-    }
-
-    public void SetBrushSize (float size) {
-        brushSize = (int)size;
-    }
-
-    public void SetRiverMove (int mode) {
-        riverMode = (OptionalToggle)mode;
     }
 }
