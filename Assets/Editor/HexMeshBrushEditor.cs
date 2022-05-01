@@ -20,18 +20,32 @@ public class HexBrushEditor : Editor {
             GUILayout.SelectionGrid((int)brushType, Enum.GetNames(typeof(BrushType)),3)
         );
         GUILayout.EndVertical();
+        GUILayout.BeginVertical("Button");
         Brush.SetType(brushType);
         if(brushType != BrushType.Rivers) {
             GUILayout.BeginHorizontal();
             GUILayout.Label("Brush Size");
-            Brush.brushSize = EditorGUILayout.IntSlider(Brush.brushSize,1,10);
+            Brush.brushSize = EditorGUILayout.IntSlider(Brush.brushSize,0,10);
             GUILayout.EndHorizontal();
-        } else Brush.brushSize = 1;
+        } else Brush.brushSize = 0;
         if(brushType == BrushType.Terrain) {
             GUILayout.BeginHorizontal();
             GUILayout.Label("Elevation");
             Brush.activeElevation = EditorGUILayout.IntSlider(Brush.activeElevation,1,10);
             GUILayout.EndHorizontal();
+        } else if (brushType == BrushType.Paint) {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Color");
+            Brush.activeColor = EditorGUILayout.ColorField(Brush.activeColor);
+            GUILayout.EndHorizontal(); 
+        } else if (brushType == BrushType.Rivers) {
+            GUILayout.BeginVertical();
+            GUILayout.Label("Add or remove rivers?");
+            Brush.removeRivers = Convert.ToBoolean(
+                GUILayout.SelectionGrid(Convert.ToInt32(Brush.removeRivers), new string[2]{"Add","Remove"} ,2)
+            );
+            GUILayout.EndVertical();
         }
+        GUILayout.EndVertical();
     }
 }

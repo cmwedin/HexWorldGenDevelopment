@@ -7,10 +7,11 @@ public enum BrushType {
 }
 public class HexMeshBrush : MonoBehaviour
 {
-    public Color[] colors;
-    private Color activeColor;
-    [HideInInspector] public int activeElevation;
-    [HideInInspector] public int brushSize;
+    //public Color[] colors;
+    [HideInInspector] public Color activeColor;
+    [HideInInspector] public int activeElevation = 1;
+    [HideInInspector] public int brushSize = 1;
+    [HideInInspector] public bool removeRivers = false;
     private BrushType brushType;
 
 
@@ -20,14 +21,6 @@ public class HexMeshBrush : MonoBehaviour
     bool isDrag;
     HexDirection dragDirection;
     HexCell previousCell;
-
-    enum OptionalToggle { Ignore, Yes, No }
-    OptionalToggle riverMode;
-
-
-    void Awake () {
-        SelectColor(0);
-    }
 
     void Update()
     {
@@ -85,31 +78,25 @@ public class HexMeshBrush : MonoBehaviour
     }
 
     void EditCell (HexCell cell) {
-        /* if (cell)
-        {
-            if (applyColor) { cell.color = activeColor; }
-            if (applyElevation) cell.Elevation = activeElevation;
-            if (riverMode == OptionalToggle.No) { cell.RemoveRiver(); }
-            else if (isDrag && riverMode == OptionalToggle.Yes) {
-                HexCell otherCell = cell.GetNeighbor(dragDirection.Opposite());
-                if (otherCell) otherCell.SetOutgoingRiver(dragDirection); }
-        }*/
-        switch (brushType) {
-            case BrushType.Terrain:
-                cell.Elevation = activeElevation;
-                break;
-            case BrushType.Paint:
-                cell.color = activeColor;
-                break;
-            case BrushType.Rivers:
-                break;
-            default: break;
+        if (cell) {
+            switch (brushType) {
+                case BrushType.Terrain:
+                    cell.Elevation = activeElevation;
+                    break;
+                case BrushType.Paint:
+                    cell.color = activeColor;
+                    break;
+                case BrushType.Rivers:
+                    if(removeRivers) {cell.RemoveRiver();}
+                    else if(isDrag) {
+                        HexCell otherCell = cell.GetNeighbor(dragDirection.Opposite());
+                        if (otherCell) otherCell.SetOutgoingRiver(dragDirection);
+                    }
+                    break;
+                default: 
+                    Debug.LogWarning("Brush type not set");
+                    break;
+            }
         }
-    }
-
-    public void SelectColor (int index) {
-        applyColor = index >= 0;
-        if (applyColor) { activeColor = colors[index]; }
-        //UnityEngine.Debug.Log("active color is " + activeColor.ToString());
     }
 }
